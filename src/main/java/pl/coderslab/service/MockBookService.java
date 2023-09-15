@@ -1,12 +1,14 @@
-package pl.coderslab.model;
+package pl.coderslab.service;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import pl.coderslab.model.Book;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class MockBookService implements BookService {
     private List<Book> list;
 
@@ -32,10 +34,11 @@ public class MockBookService implements BookService {
     }
 
     @Override
-    public Optional<Book> get(Long id) throws Exception {
-        return Optional.ofNullable(list.stream()
+    public Book get(Long id) {
+        Optional<Optional<Book>> first = Optional.of(list.stream()
                 .filter(book -> book.getId().equals(id))
-                .findFirst().orElseThrow(() -> new Exception("Book not found")));
+                .findFirst());
+        return first.get().orElse(null);
     }
 
     @Override
@@ -45,8 +48,8 @@ public class MockBookService implements BookService {
     }
 
     @Override
-    public void delete(Long id) throws Exception {
-        if (get(id).isPresent()) {
+    public void delete(Long id) {
+        if (get(id) != null) {
             this.list = list.stream()
                     .filter(book -> !book.getId().equals(id))
                     .collect(Collectors.toList());
@@ -54,10 +57,10 @@ public class MockBookService implements BookService {
     }
 
     @Override
-    public void update(Book book) throws Exception {
-        Optional<Book> bookToUpdate = get(book.getId());
-        if (bookToUpdate.isPresent()) {
-            int i = list.indexOf(bookToUpdate.get());
+    public void update(Book book) {
+        Book bookToUpdate = get(book.getId());
+        if (bookToUpdate != null) {
+            int i = list.indexOf(bookToUpdate);
             list.set(i, book);
         }
     }
